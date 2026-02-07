@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间与倒计时追踪器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f1f1f1;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .time-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            color: #4fc3f7;
+        }
+        
+        .card-title i {
+            margin-right: 12px;
+            font-size: 1.8rem;
+        }
+        
+        .time-display {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+            font-family: 'Courier New', monospace;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .seconds-number {
+            font-size: 2.2rem;
+            color: #ffcc00;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            color: #ccc;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+        
+        .progress-container {
+            margin-top: 25px;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .progress-label {
+            font-size: 1rem;
+            color: #aaa;
+        }
+        
+        .progress-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .highlight {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            width: 100%;
+        }
+        
+        .update-info {
+            font-size: 0.95rem;
+            color: #4fc3f7;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .time-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .time-display {
+                font-size: 2.2rem;
+            }
+            
+            .seconds-number {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .time-display {
+                font-size: 1.8rem;
+            }
+            
+            .seconds-number {
+                font-size: 1.5rem;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="far fa-clock"></i> 时间与倒计时追踪器</h1>
+            <p class="subtitle">实时显示当前时间，并计算距离特定日期的秒数和百分比。所有数据每秒自动更新。</p>
+        </header>
+        
+        <div class="time-cards">
+            <div class="card">
+                <h2 class="card-title"><i class="far fa-calendar-alt"></i> 当前时间</h2>
+                <div class="time-display" id="current-time">00:00:00</div>
+                <div class="description">
+                    这是当前的北京时间，包含时、分、秒信息。页面将每秒自动更新。
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-history"></i> 距离2026年1月9日过去</h2>
+                <div class="time-display">
+                    <span class="seconds-number" id="seconds-passed">0</span> 秒
+                </div>
+                <div class="description">
+                    自 <span class="highlight">2026年1月9日 0:00</span> 以来已经过去的秒数。
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-hourglass-half"></i> 距离2026年2月23日剩余</h2>
+                <div class="time-display">
+                    <span class="seconds-number" id="seconds-remaining">0</span> 秒
+                </div>
+                <div class="description">
+                    距离 <span class="highlight">2026年2月23日 12:00</span> 还剩余的秒数。
+                </div>
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span class="progress-label">从开始到现在的进度</span>
+                        <span class="progress-value" id="remaining-percentage">0.00%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="remaining-progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>时间与倒计时追踪器 &copy; 2026 | 数据实时更新</p>
+            <p class="update-info">最后更新: <span id="last-update">--:--:--</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 目标日期设置
+        const startDate = new Date('2026-01-09T00:00:00');
+        const targetDate = new Date('2026-02-23T12:00:00');
+        
+        // 获取DOM元素
+        const currentTimeElement = document.getElementById('current-time');
+        const secondsPassedElement = document.getElementById('seconds-passed');
+        const secondsRemainingElement = document.getElementById('seconds-remaining');
+        const passedPercentageElement = document.getElementById('passed-percentage');
+        const remainingPercentageElement = document.getElementById('remaining-percentage');
+        const passedProgressBar = document.getElementById('passed-progress-bar');
+        const remainingProgressBar = document.getElementById('remaining-progress-bar');
+        const lastUpdateElement = document.getElementById('last-update');
+        
+        // 格式化数字，确保两位数显示
+        function formatNumber(num) {
+            return num < 10 ? '0' + num : num;
+        }
+        
+        // 格式化大数字，添加千位分隔符
+        function formatLargeNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            
+            // 更新当前时间
+            const hours = formatNumber(now.getHours());
+            const minutes = formatNumber(now.getMinutes());
+            const seconds = formatNumber(now.getSeconds());
+            currentTimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // 计算距离开始时间已过去的秒数
+            const passedSeconds = Math.floor((now - startDate) / 1000);
+            secondsPassedElement.textContent = formatLargeNumber(passedSeconds);
+            
+            // 计算距离目标时间剩余的秒数
+            const remainingSeconds = Math.floor((targetDate - now) / 1000);
+            secondsRemainingElement.textContent = formatLargeNumber(remainingSeconds);
+            
+            // 对于剩余时间：从开始时间到目标时间的时间段
+            const totalPeriod = targetDate - startDate;
+            const elapsedTime = now - startDate;
+            const remainingPercentage = (elapsedTime / totalPeriod) * 100;
+            
+            remainingPercentageElement.textContent = remainingPercentage.toFixed(2) + '%';
+            
+            remainingProgressBar.style.width = remainingPercentage + '%';
+            
+            // 更新最后更新时间
+            lastUpdateElement.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 页面加载时立即更新时间
+        updateTime();
+        
+        // 每秒更新时间
+        setInterval(updateTime, 1000);
+        
+        // 添加页面加载动画效果
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

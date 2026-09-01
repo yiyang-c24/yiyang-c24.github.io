@@ -317,7 +317,7 @@
             let percentage = (elapsedTime / totalPeriod) * 100;
             percentage = Math.min(Math.max(percentage, 0), 100); // 限制在0-100
             
-            remainingPercentageElement.textContent = percentage.toFixed(2) + '%';
+            remainingPercentageElement.textContent = percentage.toFixed(3) + '%';
             remainingProgressBar.style.width = percentage + '%';
             
             // 更新最后更新时间
